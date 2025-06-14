@@ -144,6 +144,7 @@ const ReportsPage = () => {
                   <div className="w-24 bg-gray-200 rounded-full h-2">
                     <div 
                       className="bg-blue-600 h-2 rounded-full" 
+                      // Justification: width dynamique dépendant des données
                       style={{ width: `${(dept.count / stats.totalEmployees) * 100}%` }}
                     ></div>
                   </div>
@@ -165,6 +166,7 @@ const ReportsPage = () => {
                   <div className="w-24 bg-gray-200 rounded-full h-2">
                     <div 
                       className="bg-green-600 h-2 rounded-full" 
+                       // width calculée dynamiquement
                       style={{ width: `${(contract.count / stats.totalEmployees) * 100}%` }}
                     ></div>
                   </div>
@@ -183,7 +185,9 @@ const ReportsPage = () => {
           {stats.evaluationsByMonth.map((month, index) => (
             <div key={index} className="flex-1 flex flex-col items-center">
               <div 
+               aria-label='Barre d’évaluation pour le mois'
                 className="w-full bg-blue-600 rounded-t"
+                // Hauteur en fonction du nombre d’évaluations
                 style={{ height: `${(month.count / 3) * 100}%`, minHeight: '4px' }}
               ></div>
               <div className="mt-2 text-sm text-gray-600">{month.month}</div>
