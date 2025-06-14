@@ -67,7 +67,7 @@ const DepartmentsPage = () => {
   useEffect(() => {
     const fetchManagers = async () => {
       try {
-        const res = await fetch("http://localhost:7000/auth/users", {
+        const res = await fetch("https://backendeva.onrender.com/auth/users", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
@@ -98,14 +98,14 @@ const DepartmentsPage = () => {
       setLoading(true);
       try {
         // Fetch departments
-        const depRes = await fetch('http://localhost:7000/departement', {
+        const depRes = await fetch('https://backendeva.onrender.com/departement', {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (!depRes.ok) throw new Error('Erreur chargement départements');
         const depsData: Department[] = await depRes.json();
 
         // Fetch employees
-        const empRes = await fetch('http://localhost:7000/staff/All', {
+        const empRes = await fetch('https://backendeva.onrender.com/staff/All', {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (!empRes.ok) throw new Error('Erreur chargement employés');
@@ -127,7 +127,7 @@ const DepartmentsPage = () => {
 
   const handleViewTeam = async (departmentId: string) => {
     try {
-      const res = await fetch(`http://localhost:7000/staff/by-departement/${departmentId}`, {
+      const res = await fetch(`https://backendeva.onrender.com/staff/by-departement/${departmentId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -146,7 +146,7 @@ const DepartmentsPage = () => {
   const handleEditDepartment = async (department: Department) => {
     try {
       setOpenAddModal(false);
-      const res = await fetch('http://localhost:7000/auth/users', {
+      const res = await fetch('https://backendeva.onrender.com/auth/users', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -210,7 +210,7 @@ const DepartmentsPage = () => {
       let res;
       if (editingDepartment) {
         // PUT update
-        res = await fetch(`http://localhost:7000/departement/${editingDepartment._id}`, {
+        res = await fetch(`https://backendeva.onrender.com/departement/${editingDepartment._id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -220,7 +220,7 @@ const DepartmentsPage = () => {
         });
       } else {
         // POST create
-        res = await fetch('http://localhost:7000/departement', {
+        res = await fetch('https://backendeva.onrender.com/departement', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -263,7 +263,7 @@ const DepartmentsPage = () => {
     if (!confirm('Confirmer la suppression du département ?')) return;
 
     try {
-      const res = await fetch(`http://localhost:7000/departement/${id}`, {
+      const res = await fetch(`https://backendeva.onrender.com/departement/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });

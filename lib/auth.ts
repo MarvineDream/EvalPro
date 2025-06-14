@@ -5,7 +5,7 @@ export const authenticateUser = async (
   password: string
 ): Promise<{ user: User; token: string } | null> => {
   try {
-    const response = await fetch('http://localhost:7000/auth/login', {
+    const response = await fetch('https://backendeva.onrender.com/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

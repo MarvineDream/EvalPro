@@ -47,18 +47,18 @@ const DashboardPage = () => {
     const fetchData = async () => {
       try {
         // Récupérer les statistiques
-        const statsResponse = await fetch('http://localhost:7000/staff/stats');
+        const statsResponse = await fetch('https://backendeva.onrender.com/staff/stats');
         const statsData = await statsResponse.json();
         setStats(statsData);
 
         // Récupérer les contrats expirants
-        const contractsResponse = await fetch('http://localhost:7000/staff/expired-contracts');
+        const contractsResponse = await fetch('https://backendeva.onrender.com/staff/expired-contracts');
         const contractsData = await contractsResponse.json();
         setContractsExpiring(contractsData);
 
         // Récupérer les employés par département
         if (user?.departmentId) {
-          const employeesResponse = await fetch(`http://localhost:7000/staff/${user.departmentId}`);
+          const employeesResponse = await fetch(`https://backendeva.onrender.com/staff/${user.departmentId}`);
           const employeesData = await employeesResponse.json();
           setDepartmentEmployees(employeesData);
         }

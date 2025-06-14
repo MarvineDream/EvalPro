@@ -25,7 +25,7 @@ const PersonnelPage = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:7000/staff/All', {
+      const res = await fetch('https://backendeva.onrender.com/staff/All', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -42,7 +42,7 @@ const PersonnelPage = () => {
   const fetchDepartments = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:7000/departement', {
+      const res = await fetch('https://backendeva.onrender.com/departement', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -66,7 +66,7 @@ const PersonnelPage = () => {
     if (!confirmed) return;
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:7000/staff/${id}`, {
+      const res = await fetch(`https://backendeva.onrender.com/staff/${id}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
