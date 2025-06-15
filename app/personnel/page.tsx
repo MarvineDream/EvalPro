@@ -20,7 +20,7 @@ const PersonnelPage = () => {
   const [loading, setLoading] = useState(false);
 
   const isHR = user?.role === 'RH';
-  const token = user?.token;
+  const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
 
   const fetchEmployees = useCallback(async () => {
   if (!token) return;
