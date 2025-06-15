@@ -144,10 +144,11 @@ const PersonnelPage = () => {
 
   const filteredEmployees = employees.filter(emp => {
     const matchesSearch =
-      emp.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      emp.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      emp.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      emp.position.toLowerCase().includes(searchTerm.toLowerCase());
+  emp.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  emp.prenom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  emp.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  (emp.poste || '').toLowerCase().includes(searchTerm.toLowerCase());
+
 
     const matchesDepartment = !selectedDepartment || emp.departmentId === selectedDepartment;
     const matchesContract = !selectedContractType || emp.contractType === selectedContractType;
@@ -317,7 +318,7 @@ const PersonnelPage = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold">{employee.prenom} {employee.nom}</h3>
-                    <p className="text-sm text-gray-600">{employee.position}</p>
+                    <p className="text-sm text-gray-600">{employee.poste}</p>
                   </div>
                 </div>
                 <div className="flex space-x-1">

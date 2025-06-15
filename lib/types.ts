@@ -23,7 +23,7 @@ export interface Employee {
   prenom: string;
   nom: string;
   email: string;
-  position: string;
+  poste: string;
   departmentId: string;
   department?: Department;
   contractType: 'CDI' | 'CDD' | 'stagiaire' | 'consultant';

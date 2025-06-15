@@ -42,7 +42,7 @@ const TeamPage = () => {
   const filteredTeamMembers = teamMembers.filter(member =>
     member.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
     member.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.position.toLowerCase().includes(searchTerm.toLowerCase())
+    member.poste.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getEmployeeEvaluations = (employeeId: string) => {
@@ -186,7 +186,7 @@ const TeamPage = () => {
                       <h3 className="text-lg font-semibold text-gray-900">
                         {member.prenom} {member.nom}
                       </h3>
-                      <p className="text-sm text-gray-600">{member.position}</p>
+                      <p className="text-sm text-gray-600">{member.poste}</p>
                     </div>
                   </div>
                   <button 
