@@ -191,8 +191,8 @@ const NewPotentialEvaluationPage = () => {
             >
               <option value="">Sélectionner un employé</option>
               {mockEmployees.map(emp => (
-                <option key={emp.id} value={emp.id}>
-                  {emp.firstName} {emp.lastName} - {emp.position}
+                <option key={emp._id} value={emp._id}>
+                  {emp.prenom} {emp.nom} - {emp.poste}
                 </option>
               ))}
             </select>

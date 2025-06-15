@@ -279,7 +279,7 @@ const PersonnelPage = () => {
           >
             <option value="">Tous les départements</option>
             {departments.map(dept => (
-              <option key={dept._id} value={dept._id}>{dept.name}</option>
+              <option key={dept.id} value={dept.id}>{dept.name}</option>
             ))}
           </select>
 
@@ -346,7 +346,7 @@ const PersonnelPage = () => {
 
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
                   <Building2 className="h-4 w-4" />
-                  <span>{departments.find(d => d._id === employee.departmentId)?.name || 'Non spécifié'}</span>
+                  <span>{departments.find(d => d.id === employee.departmentId)?.name || 'Non spécifié'}</span>
                 </div>
 
                 <div className="flex items-center justify-between">
