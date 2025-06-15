@@ -11,43 +11,44 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { login } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsLoading(true);
-  setError('');
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
 
-  try {
-    const result = await login(email, password);
-    if (result && result.user) {
-      const { role } = result.user;
+    try {
+      const result = await login(email, password);
+      console.log('Résultat login:', result);
 
-      // Redirection directe selon le rôle
-      if (role === 'RH') {
-        router.push('/dashboard');
-      } else if (role === 'Manager') {
-        router.push('/dashboard');
+      if (result && result.user) {
+        const { role } = result.user;
+        console.log('Utilisateur:', result.user);
+        console.log('Rôle:', role);
+
+        if (role === 'RH' || role === 'Manager') {
+          router.push('/dashboard');
+        } else {
+          setError('Rôle utilisateur non reconnu');
+        }
       } else {
-        setError('Rôle utilisateur non reconnu');
+        setError('Email ou mot de passe incorrect');
       }
-    } else {
-      setError('Email ou mot de passe incorrect');
+    } catch (err) {
+      console.error('Erreur de connexion:', err);
+      setError('Une erreur est survenue. Veuillez réessayer.');
+    } finally {
+      setIsLoading(false);
     }
-  } catch (err) {
-    console.error('Erreur de connexion:', err);
-    setError('Une erreur est survenue. Veuillez réessayer.');
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
-        {/* Logo and Title */}
+        {/* Logo + Titre */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-3 mb-4">
             <div className="p-3 bg-blue-600 rounded-xl">
@@ -58,7 +59,7 @@ const LoginPage = () => {
           <p className="text-gray-600">Système de gestion des évaluations RH</p>
         </div>
 
-        {/* Login Form */}
+        {/* Formulaire */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -72,7 +73,7 @@ const LoginPage = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                placeholder="votre.email@company.com"
+                placeholder="votre.email@entreprise.com"
               />
             </div>
 
@@ -104,6 +105,7 @@ const LoginPage = () => {
               </div>
             </div>
 
+            {/* Erreur */}
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
                 {error}

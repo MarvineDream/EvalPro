@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   ClipboardList,
@@ -22,28 +23,45 @@ import {
   mockMidTermEvaluations,
   mockPotentialEvaluations,
 } from '@/lib/mock-data';
+type Employee = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  // autres propriétés...
+};
 
-const EvaluationsPage = () => {
+
+export default function EvaluationsPage() {
+  /* ---------------------------------------------------------------------- */
+  /* Contexte & états                                                       */
+  /* ---------------------------------------------------------------------- */
   const { user } = useAuth();
   const isHR = user?.role === 'RH';
 
-  const [activeTab, setActiveTab] = useState<'midterm' | 'potential' | 'final'>('midterm');
+
+  const [activeTab, setActiveTab] =
+    useState<'midterm' | 'potential' | 'final'>('midterm');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [midTermEvaluations, setMidTermEvaluations] = useState<any[]>([]);
-  const [potentialEvaluations, setPotentialEvaluations] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    const midterms = getEvaluationsWithEmployee();
-    setMidTermEvaluations(midterms);
+  /* ---------------------------------------------------------------------- */
+  /* Données                                                                */
+  /* ---------------------------------------------------------------------- */
+  const midTermEvaluations = getEvaluationsWithEmployee();
 
-    const potentials = mockPotentialEvaluations.map((evaluation) => ({
-      ...evaluation,
-      employee: evaluation.employee || mockMidTermEvaluations.find((me) => me.employeeId === evaluation.employeeId)?.employee,
-    }));
-    setPotentialEvaluations(potentials);
-  }, []);
+  const potentialEvaluations = mockPotentialEvaluations.map((evaluation) => ({
+    ...evaluation,
+    employee:
+      evaluation.employee ??
+      mockMidTermEvaluations.find(
+        (me) => me.employeeId === evaluation.employeeId,
+      )?.employee,
+  }));
 
+  /* ---------------------------------------------------------------------- */
+  /* Helpers d'affichage                                                    */
+  /* ---------------------------------------------------------------------- */
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'TERMINEE':
@@ -58,11 +76,11 @@ const EvaluationsPage = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'TERMINEE':
-        return <CheckCircle className="h-4 w-4" aria-hidden="true" />;
+        return <CheckCircle className="h-4 w-4" />;
       case 'EN_COURS':
-        return <Clock className="h-4 w-4" aria-hidden="true" />;
+        return <Clock className="h-4 w-4" />;
       default:
-        return <AlertTriangle className="h-4 w-4" aria-hidden="true" />;
+        return <AlertTriangle className="h-4 w-4" />;
     }
   };
 
@@ -79,205 +97,347 @@ const EvaluationsPage = () => {
     }
   };
 
-  const formatDate = (date: Date | string) => {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleDateString('fr-FR');
-  };
-
-  const filterEvaluations = (evaluations: any[]) => {
-    return evaluations.filter((e) => {
-      const matchesSearch =
-        `${e.employee?.firstName ?? ''} ${e.employee?.lastName ?? ''}`
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
-
-      const matchesStatus = !statusFilter || e.status === statusFilter;
-
-      return matchesSearch && matchesStatus;
-    });
-  };
-
-  const renderMidTermEvaluations = () => {
-    const filtered = filterEvaluations(midTermEvaluations);
-    return (
-      <div className="space-y-4">
-        {filtered.map((evaluation) => (
-          <div key={evaluation.id} className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow">
-            <div className="p-6 flex items-start justify-between">
-              <div className="flex space-x-4">
+  /* ---------------------------------------------------------------------- */
+  /* Rendus spécialisés                                                     */
+  /* ---------------------------------------------------------------------- */
+  const renderMidTermEvaluations = () => (
+    <div className="space-y-4">
+      {midTermEvaluations.map((evaluation) => (
+        <div
+          key={evaluation.id}
+          className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200"
+        >
+          <div className="p-6">
+            <div className="flex items-start justify-between">
+              {/* Colonne gauche ------------------------------------------------ */}
+              <div className="flex items-start space-x-4">
                 <div className="p-3 bg-blue-50 rounded-lg">
-                  <ClipboardList className="h-6 w-6 text-blue-600" aria-hidden="true" />
+                  <ClipboardList className="h-6 w-6 text-blue-600" />
                 </div>
-                <div>
+
+                <div className="flex-1">
+                  {/* Titre + statut ------------------------------------------ */}
                   <div className="flex items-center space-x-3 mb-2">
                     <h3 className="text-lg font-semibold text-gray-900">
-                      Évaluation Mi-parcours - {evaluation.period}
+                      Évaluation Mi-parcours – {evaluation.period}
                     </h3>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(evaluation.status)}`}>
+                    <span
+                      className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                        evaluation.status,
+                      )}`}
+                    >
                       {getStatusIcon(evaluation.status)}
-                      <span>{evaluation.status === 'TERMINEE' ? 'Terminée' : 'En cours'}</span>
+                      <span>
+                        {evaluation.status === 'TERMINEE' ? 'Terminée' : 'En cours'}
+                      </span>
                     </span>
                   </div>
+
+                  {/* Métadonnées --------------------------------------------- */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-                    <div className="flex items-center space-x-2"><User className="h-4 w-4" aria-hidden="true" /><span>{evaluation.employee?.firstName} {evaluation.employee?.lastName}</span></div>
-                    <div className="flex items-center space-x-2"><Calendar className="h-4 w-4" aria-hidden="true" /><span>Créée le {formatDate(evaluation.createdAt)}</span></div>
-                    <div className="flex items-center space-x-2"><Star className="h-4 w-4" aria-hidden="true" /><span>Note globale: {evaluation.globalAppreciation}/5</span></div>
+                    <div className="flex items-center space-x-2">
+                      <User className="h-4 w-4" />
+                      <span>
+                        {evaluation.employee?.firstName}{' '}
+                        {evaluation.employee?.lastName}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Calendar className="h-4 w-4" />
+                      <span>
+                        Créée le{' '}
+                        {evaluation.createdAt.toLocaleDateString('fr-FR')}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Star className="h-4 w-4" />
+                      <span>Note globale : {evaluation.globalAppreciation}/5</span>
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-700 mt-3">{evaluation.objectives.length} objectif(s) • {evaluation.objectives.filter((obj: { completed: boolean }) => obj.completed).length
-} terminé(s)</p>
+
+                  {/* Objectifs ------------------------------------------------ */}
+                  <div className="mt-3">
+                    <p className="text-sm text-gray-700">
+                      {evaluation.objectives.length} objectif(s) •{' '}
+                      {evaluation.objectives.filter((o) => o.completed).length}{' '}
+                      terminé(s)
+                    </p>
+                  </div>
                 </div>
               </div>
+
+              {/* Actions ------------------------------------------------------ */}
               <div className="flex space-x-2">
-                <button
-                  className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
-                  aria-label="Voir l'évaluation"
-                >
-                  <Eye className="h-4 w-4" aria-hidden="true" />
+                <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200">
+                  <Eye className="h-4 w-4" />
                 </button>
                 {(isHR || evaluation.evaluatorId === user?.id) && (
-                  <button
-                    className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg"
-                    aria-label="Modifier l'évaluation"
-                  >
-                    <Edit className="h-4 w-4" aria-hidden="true" />
+                  <button className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200">
+                    <Edit className="h-4 w-4" />
                   </button>
                 )}
               </div>
             </div>
           </div>
-        ))}
-      </div>
-    );
-  };
+        </div>
+      ))}
+    </div>
+  );
 
-  const renderPotentialEvaluations = () => {
-    const filtered = filterEvaluations(potentialEvaluations);
-    return (
-      <div className="space-y-4">
-        {filtered.map((evaluation) => (
-          <div key={evaluation.id} className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow">
-            <div className="p-6 flex items-start justify-between">
-              <div className="flex space-x-4">
-                <div className="p-3 bg-purple-50 rounded-lg"><Star className="h-6 w-6 text-purple-600" aria-hidden="true" /></div>
-                <div>
+  const renderPotentialEvaluations = () => (
+    <div className="space-y-4">
+      {potentialEvaluations.map((evaluation) => (
+        <div
+          key={evaluation.id}
+          className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200"
+        >
+          <div className="p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start space-x-4">
+                <div className="p-3 bg-purple-50 rounded-lg">
+                  <Star className="h-6 w-6 text-purple-600" />
+                </div>
+
+                <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">Évaluation de Potentiel</h3>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getClassificationColor(evaluation.classification)}`}>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Évaluation de Potentiel
+                    </h3>
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getClassificationColor(
+                        evaluation.classification,
+                      )}`}
+                    >
                       {evaluation.classification}
                     </span>
                   </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-                    <div className="flex items-center space-x-2"><User className="h-4 w-4" aria-hidden="true" /><span>{evaluation.employee?.firstName} {evaluation.employee?.lastName}</span></div>
-                    <div className="flex items-center space-x-2"><Calendar className="h-4 w-4" aria-hidden="true" /><span>Créée le {formatDate(evaluation.createdAt)}</span></div>
-                    <div className="flex items-center space-x-2"><Star className="h-4 w-4" aria-hidden="true" /><span>Score final: {evaluation.finalScore}/5</span></div>
+                    <div className="flex items-center space-x-2">
+                      <User className="h-4 w-4" />
+                      <span>
+                        {evaluation.employee?.firstName}{' '}
+                        {evaluation.employee?.lastName}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Calendar className="h-4 w-4" />
+                      <span>
+                        Créée le{' '}
+                        {evaluation.createdAt.toLocaleDateString('fr-FR')}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Star className="h-4 w-4" />
+                      <span>Score final : {evaluation.finalScore}/5</span>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 mt-3 text-xs">
-                    <div className="text-center p-2 bg-blue-50 rounded"><div className="font-medium text-blue-700">{evaluation.criteria.leadership}</div><div className="text-blue-600">Leadership</div></div>
-                    <div className="text-center p-2 bg-green-50 rounded"><div className="font-medium text-green-700">{evaluation.criteria.communication}</div><div className="text-green-600">Communication</div></div>
-                    <div className="text-center p-2 bg-purple-50 rounded"><div className="font-medium text-purple-700">{evaluation.criteria.innovation}</div><div className="text-purple-600">Innovation</div></div>
+
+                  <div className="mt-3">
+                    <div className="grid grid-cols-3 gap-2 text-xs">
+                      <div className="text-center p-2 bg-blue-50 rounded">
+                        <div className="font-medium text-blue-700">
+                          {evaluation.criteria.leadership}
+                        </div>
+                        <div className="text-blue-600">Leadership</div>
+                      </div>
+                      <div className="text-center p-2 bg-green-50 rounded">
+                        <div className="font-medium text-green-700">
+                          {evaluation.criteria.communication}
+                        </div>
+                        <div className="text-green-600">Communication</div>
+                      </div>
+                      <div className="text-center p-2 bg-purple-50 rounded">
+                        <div className="font-medium text-purple-700">
+                          {evaluation.criteria.innovation}
+                        </div>
+                        <div className="text-purple-600">Innovation</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
+
+              {/* Actions */}
               <div className="flex space-x-2">
-                <button
-                  className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
-                  aria-label="Voir l'évaluation de potentiel"
-                >
-                  <Eye className="h-4 w-4" aria-hidden="true" />
+                <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200">
+                  <Eye className="h-4 w-4" />
                 </button>
                 {isHR && (
-                  <button
-                    className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg"
-                    aria-label="Modifier l'évaluation de potentiel"
-                  >
-                    <Edit className="h-4 w-4" aria-hidden="true" />
+                  <button className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200">
+                    <Edit className="h-4 w-4" />
                   </button>
                 )}
               </div>
             </div>
           </div>
-        ))}
-      </div>
-    );
-  };
-
-  return (
-    <main className="px-10 py-6 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">Mes évaluations</h1>
-
-      <div className="mb-6 flex justify-between items-center">
-        <div className="flex space-x-2">
-          <button
-            onClick={() => setActiveTab('midterm')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-              activeTab === 'midterm' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'
-            }`}
-            aria-label="Onglet Évaluations Mi-parcours"
-          >
-            <ClipboardList className="h-5 w-5" aria-hidden="true" />
-            <span>Mi-parcours</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('potential')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-              activeTab === 'potential' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700'
-            }`}
-            aria-label="Onglet Évaluations de Potentiel"
-          >
-            <Star className="h-5 w-5" aria-hidden="true" />
-            <span>Potentiel</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('final')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-              activeTab === 'final' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'
-            }`}
-            aria-label="Onglet Évaluations Finales"
-          >
-            <FileText className="h-5 w-5" aria-hidden="true" />
-            <span>Finales</span>
-          </button>
         </div>
+      ))}
+    </div>
+  );
 
-        <div className="flex space-x-2">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Rechercher un collaborateur..."
-              className="pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              aria-label="Recherche collaborateur"
-            />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" aria-hidden="true" />
+  const renderFinalEvaluations = () => (
+    <div className="text-center py-12">
+      <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+      <h3 className="text-lg font-medium text-gray-900 mb-2">Évaluations finales</h3>
+      <p className="text-gray-600 mb-4">
+        Les évaluations finales combinent les évaluations mi-parcours et de potentiel.
+      </p>
+      {isHR && (
+        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+          Créer une évaluation finale
+        </button>
+      )}
+    </div>
+  );
+
+  /* ---------------------------------------------------------------------- */
+  /* Rendu principal                                                        */
+  /* ---------------------------------------------------------------------- */
+  return (
+    <div className="p-6 space-y-6">
+      {/* ------------------------------------------------------------------ */}
+      {/* En-tête de page                                                    */}
+      {/* ------------------------------------------------------------------ */}
+      <div className="border-b border-gray-200 pb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center space-x-3">
+              <ClipboardList className="h-8 w-8 text-blue-600" />
+              <span>Évaluations</span>
+            </h1>
+            <p className="text-gray-600 mt-2">
+              {isHR
+                ? 'Gérez toutes les évaluations des employés'
+                : 'Consultez et gérez vos évaluations'}
+            </p>
           </div>
 
+          {/* Bouton "Nouvelle évaluation" -------------------------------- */}
           <button
-            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
-            aria-label="Filtrer par statut"
+            onClick={() => setOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
           >
-            <Filter className="h-5 w-5" aria-hidden="true" />
+            <Plus className="h-5 w-5" />
+            <span>Nouvelle évaluation</span>
           </button>
-
-          {isHR && (
-            <button
-              className="p-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center space-x-1"
-              aria-label="Créer une nouvelle évaluation"
-            >
-              <Plus className="h-5 w-5" aria-hidden="true" />
-              <span>Ajouter</span>
-            </button>
-          )}
         </div>
+
+        {/* Popup choix Mi-parcours / Potentiel ---------------------------- */}
+        {open && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-80">
+              <h2 className="text-lg font-semibold mb-4">Type d'évaluation</h2>
+              <div className="flex flex-col space-y-3">
+                <Link
+                  href="/evaluations/midterm/new"
+                  onClick={() => setOpen(false)}
+                  className="bg-blue-500 hover:bg-blue-600 text-white text-center px-4 py-2 rounded"
+                >
+                  Mi-parcours
+                </Link>
+                <Link
+                  href="/evaluations/potential/new"
+                  onClick={() => setOpen(false)}
+                  className="bg-green-500 hover:bg-green-600 text-white text-center px-4 py-2 rounded"
+                >
+                  Potentiel
+                </Link>
+                <button
+                  className="text-sm text-gray-500 hover:text-gray-700 mt-4"
+                  onClick={() => setOpen(false)}
+                >
+                  Annuler
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {activeTab === 'midterm' && renderMidTermEvaluations()}
-      {activeTab === 'potential' && renderPotentialEvaluations()}
-      {activeTab === 'final' && (
-        <div className="text-center text-gray-500">Pas d’évaluations finales disponibles.</div>
-      )}
-    </main>
-  );
-};
+      {/* ------------------------------------------------------------------ */}
+      {/* Carte avec onglets                                                 */}
+      {/* ------------------------------------------------------------------ */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+        {/* Onglets --------------------------------------------------------- */}
+        <div className="border-b border-gray-200">
+          <nav className="flex space-x-8 px-6">
+            <button
+              onClick={() => setActiveTab('midterm')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
+                activeTab === 'midterm'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Mi-parcours ({midTermEvaluations.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('potential')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
+                activeTab === 'potential'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Potentiel ({potentialEvaluations.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('final')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
+                activeTab === 'final'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Finales (0)
+            </button>
+          </nav>
+        </div>
 
-export default EvaluationsPage;
+        {/* Filtres --------------------------------------------------------- */}
+        <div className="p-6 border-b border-gray-200">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Rechercher une évaluation..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Tous les statuts</option>
+              <option value="EN_COURS">En cours</option>
+              <option value="TERMINEE">Terminée</option>
+            </select>
+
+            <div className="flex items-center space-x-2">
+              <Filter className="h-5 w-5 text-gray-400" />
+              <span className="text-sm text-gray-600">
+                {activeTab === 'midterm' && `${midTermEvaluations.length} évaluation(s)`}
+                {activeTab === 'potential' &&
+                  `${potentialEvaluations.length} évaluation(s)`}
+                {activeTab === 'final' && '0 évaluation(s)'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Contenu --------------------------------------------------------- */}
+        <div className="p-6">
+          {activeTab === 'midterm' && renderMidTermEvaluations()}
+          {activeTab === 'potential' && renderPotentialEvaluations()}
+          {activeTab === 'final' && renderFinalEvaluations()}
+        </div>
+      </div>
+    </div>
+  );
+}
