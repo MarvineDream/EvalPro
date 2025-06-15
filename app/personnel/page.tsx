@@ -78,7 +78,7 @@ const PersonnelPage = () => {
         },
       });
       if (res.ok) {
-        setEmployees(prev => prev.filter(e => e.id !== id));
+        setEmployees(prev => prev.filter(e => e._id !== id));
       } else {
         alert("Erreur lors de la suppression");
       }
@@ -279,7 +279,7 @@ const PersonnelPage = () => {
           >
             <option value="">Tous les départements</option>
             {departments.map(dept => (
-              <option key={dept.id} value={dept.id}>{dept.name}</option>
+              <option key={dept._id} value={dept._id}>{dept.name}</option>
             ))}
           </select>
 
@@ -307,7 +307,7 @@ const PersonnelPage = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredEmployees.map((employee) => (
-          <div key={employee.id} className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow">
+          <div key={employee._id} className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow">
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
@@ -330,7 +330,7 @@ const PersonnelPage = () => {
                       <button className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg" aria-label="Modifier l'employé">
                         <Edit className="h-4 w-4" />
                       </button>
-                      <button onClick={() => deleteEmployee(employee.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg" aria-label="Supprimer l'employé">
+                      <button onClick={() => deleteEmployee(employee._id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg" aria-label="Supprimer l'employé">
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </>
@@ -346,7 +346,7 @@ const PersonnelPage = () => {
 
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
                   <Building2 className="h-4 w-4" />
-                  <span>{departments.find(d => d.id === employee.departmentId)?.name || 'Non spécifié'}</span>
+                  <span>{departments.find(d => d._id === employee.departmentId)?.name || 'Non spécifié'}</span>
                 </div>
 
                 <div className="flex items-center justify-between">

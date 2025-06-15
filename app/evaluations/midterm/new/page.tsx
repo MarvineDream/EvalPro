@@ -142,7 +142,7 @@ const NewMidTermEvaluationPage = () => {
                 >
                   <option value="">Sélectionner un employé</option>
                   {availableEmployees.map(emp => (
-                    <option key={emp.id} value={emp.id}>
+                    <option key={emp._id} value={emp._id}>
                       {emp.prenom} {emp.nom} - {emp.poste}
                     </option>
                   ))}
