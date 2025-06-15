@@ -1,8 +1,8 @@
 export interface User {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  prenom: string;
+  nom: string;
   role: 'RH' | 'Manager';
   departmentId?: string;
   createdAt: Date;
@@ -20,13 +20,13 @@ export interface Department {
 export interface Employee {
   id: string;
   employeeId: string;
-  firstName: string;
-  lastName: string;
+  prenom: string;
+  nom: string;
   email: string;
   position: string;
   departmentId: string;
   department?: Department;
-  contractType: 'CDI' | 'CDD' | 'STAGE' | 'CONSULTANT';
+  contractType: 'CDI' | 'CDD' | 'stagiaire' | 'consultant';
   contractStartDate: Date;
   contractEndDate?: Date;
   salary?: number;

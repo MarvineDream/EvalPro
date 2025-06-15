@@ -232,7 +232,7 @@ const DepartmentsPage = () => {
 
       // Amélioration de la gestion des erreurs
       if (!res.ok) {
-        const errorText = await res.text(); // ou res.json() si le serveur renvoie un JSON
+        const errorText = await res.json(); // ou res.json() si le serveur renvoie un JSON
         throw new Error(`Erreur lors de la sauvegarde : ${errorText}`);
       }
 

@@ -21,8 +21,8 @@ const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
+    prenom: user?.prenom || '',
+    nom: user?.nom || '',
     email: user?.email || '',
     currentPassword: '',
     newPassword: '',
@@ -74,7 +74,7 @@ const SettingsPage = () => {
             </label>
             <input
               type="text"
-              value={formData.firstName}
+              value={formData.prenom}
               onChange={(e) => handleInputChange('firstName', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Entrez votre prénom"
@@ -86,7 +86,7 @@ const SettingsPage = () => {
             </label>
             <input
               type="text"
-              value={formData.lastName}
+              value={formData.nom}
               onChange={(e) => handleInputChange('lastName', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Entrez votre nom"

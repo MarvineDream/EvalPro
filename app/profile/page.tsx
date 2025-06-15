@@ -23,8 +23,8 @@ const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
+    prenom: user?.prenom || '',
+    nom: user?.nom || '',
     email: user?.email || '',
     currentPassword: '',
     newPassword: '',
@@ -52,8 +52,8 @@ const ProfilePage = () => {
 
   const handleCancel = () => {
     setFormData({
-      firstName: user?.firstName || '',
-      lastName: user?.lastName || '',
+      prenom: user?.prenom || '',
+      nom: user?.nom || '',
       email: user?.email || '',
       currentPassword: '',
       newPassword: '',
@@ -122,12 +122,12 @@ const ProfilePage = () => {
                   <input
                     id="firstName"
                     type="text"
-                    value={formData.firstName}
+                    value={formData.prenom}
                     onChange={(e) => handleInputChange('firstName', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 ) : (
-                  <p className="text-gray-900 py-2">{user?.firstName}</p>
+                  <p className="text-gray-900 py-2">{user?.prenom}</p>
                 )}
               </div>
               
@@ -139,12 +139,12 @@ const ProfilePage = () => {
                   <input
                     id="lastName"
                     type="text"
-                    value={formData.lastName}
+                    value={formData.nom}
                     onChange={(e) => handleInputChange('lastName', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 ) : (
-                  <p className="text-gray-900 py-2">{user?.lastName}</p>
+                  <p className="text-gray-900 py-2">{user?.nom}</p>
                 )}
               </div>
               
@@ -290,11 +290,11 @@ const ProfilePage = () => {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center">
             <div className="h-24 w-24 rounded-full bg-blue-600 flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl font-medium text-white">
-                {user?.firstName?.[0]}{user?.lastName?.[0]}
+                {user?.prenom?.[0]}{user?.nom?.[0]}
               </span>
             </div>
             <h3 className="text-lg font-semibold text-gray-900">
-              {user?.firstName} {user?.lastName}
+              {user?.prenom} {user?.nom}
             </h3>
             <p className="text-sm text-gray-600">
               {user?.role === 'RH' ? 'Ressources Humaines' : 'Manager'}

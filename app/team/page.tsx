@@ -40,8 +40,8 @@ const TeamPage = () => {
   const evaluations = getEvaluationsWithEmployee();
   
   const filteredTeamMembers = teamMembers.filter(member =>
-    member.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    member.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    member.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
     member.position.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -179,12 +179,12 @@ const TeamPage = () => {
                   <div className="flex items-center space-x-3">
                     <div className="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center">
                       <span className="text-lg font-medium text-white">
-                        {member.firstName[0]}{member.lastName[0]}
+                        {member.prenom[0]}{member.nom[0]}
                       </span>
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900">
-                        {member.firstName} {member.lastName}
+                        {member.prenom} {member.nom}
                       </h3>
                       <p className="text-sm text-gray-600">{member.position}</p>
                     </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Users, Plus, Search, Filter,
@@ -20,52 +20,47 @@ const PersonnelPage = () => {
   const [loading, setLoading] = useState(false);
 
   const isHR = user?.role === 'RH';
+  const token = user?.token;
 
-  const fetchEmployees = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('https://backendeva.onrender.com/staff/All', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await res.json();
-      setEmployees(data);
-    } catch (error) {
-      console.error('Erreur lors du chargement des employés', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchEmployees = useCallback(async () => {
+  if (!token) return;
+  setLoading(true);
+  try {
+    const res = await fetch('https://backendeva.onrender.com/staff/All', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await res.json();
+    console.log("Données reçues du backend :", data);
+    setEmployees(Array.isArray(data) ? data : []);
+  } catch (error) {
+    console.error('Erreur lors du chargement des employés', error);
+  } finally {
+    setLoading(false);
+  }
+}, [token]);
 
-  const fetchDepartments = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('https://backendeva.onrender.com/departement', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        setDepartments(data);
-      } else {
-        console.error('Format de réponse inattendu :', data);
-        setDepartments([]);
-      }
-
-    } catch (error) {
-      console.error('Erreur lors du chargement des départements', error);
-      setDepartments([]);
-    }
-  };
+  const fetchDepartments = useCallback(async () => {
+  if (!token) return;
+  try {
+    const res = await fetch('https://backendeva.onrender.com/departement', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await res.json();
+    setDepartments(Array.isArray(data) ? data : []);
+  } catch (error) {
+    console.error('Erreur lors du chargement des départements', error);
+    setDepartments([]);
+  }
+}, [token]);
 
   const deleteEmployee = async (id: string) => {
     const confirmed = confirm("Supprimer cet employé ?");
-    if (!confirmed) return;
+    if (!confirmed || !token) return;
     try {
-      const token = localStorage.getItem('token');
       const res = await fetch(`https://backendeva.onrender.com/staff/${id}`, {
         method: 'DELETE',
         headers: {
@@ -83,14 +78,16 @@ const PersonnelPage = () => {
   };
 
   useEffect(() => {
+  if (token) {
     fetchEmployees();
     fetchDepartments();
-  }, []);
+  }
+}, [token, fetchEmployees, fetchDepartments]);
 
   const filteredEmployees = employees.filter(emp => {
     const matchesSearch =
-      emp.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      emp.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      emp.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      emp.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
       emp.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       emp.position.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -156,10 +153,9 @@ const PersonnelPage = () => {
             className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Tous les départements</option>
-            {Array.isArray(departments) &&
-              departments.map(dept => (
-                <option key={dept.id} value={dept.id}>{dept.name}</option>
-              ))}
+            {departments.map(dept => (
+              <option key={dept.id} value={dept.id}>{dept.name}</option>
+            ))}
           </select>
 
           <select
@@ -192,11 +188,11 @@ const PersonnelPage = () => {
                 <div className="flex items-center space-x-3">
                   <div className="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center">
                     <span className="text-lg font-medium text-white">
-                      {employee.firstName[0]}{employee.lastName[0]}
+                      {employee.prenom[0]}{employee.nom[0]}
                     </span>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold">{employee.firstName} {employee.lastName}</h3>
+                    <h3 className="text-lg font-semibold">{employee.prenom} {employee.nom}</h3>
                     <p className="text-sm text-gray-600">{employee.position}</p>
                   </div>
                 </div>

@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import { FileText, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext'; 
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -11,38 +11,43 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  const router = useRouter();
+  
   const { login } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
+  e.preventDefault();
+  setIsLoading(true);
+  setError('');
 
-    try {
-      const success = await login(email, password);
-      if (success) {
-        const role = localStorage.getItem('userRole');
+  try {
+    const result = await login(email, password);
+    if (result && result.user) {
+      const { role } = result.user;
 
-        if (role === 'RH') {
-          router.push('/dashboard');
-        } else if (role === 'Manager') {
-          router.push('/dashboard/manager');
-        }
+      // Redirection directe selon le rôle
+      if (role === 'RH') {
+        router.push('/dashboard');
+      } else if (role === 'Manager') {
+        router.push('/dashboard');
       } else {
-        setError('Email ou mot de passe incorrect');
+        setError('Rôle utilisateur non reconnu');
       }
-    } catch (err) {
-      setError('Une erreur est survenue. Veuillez réessayer.');
-    } finally {
-      setIsLoading(false);
+    } else {
+      setError('Email ou mot de passe incorrect');
     }
-  };
+  } catch (err) {
+    console.error('Erreur de connexion:', err);
+    setError('Une erreur est survenue. Veuillez réessayer.');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
+        {/* Logo and Title */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-3 mb-4">
             <div className="p-3 bg-blue-600 rounded-xl">
@@ -53,6 +58,7 @@ const LoginPage = () => {
           <p className="text-gray-600">Système de gestion des évaluations RH</p>
         </div>
 
+        {/* Login Form */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -88,7 +94,6 @@ const LoginPage = () => {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  aria-label={showPassword ? 'Cacher le mot de passe' : 'Afficher le mot de passe'}
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5 text-gray-400" />

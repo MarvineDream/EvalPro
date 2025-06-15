@@ -58,14 +58,14 @@ const Sidebar = () => {
           <div className="flex-shrink-0">
             <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center">
               <span className="text-sm font-medium text-white">
-                {user.firstName?.[0]}
-                {user.lastName?.[0]}
+                {user.prenom?.[0]}
+                {user.nom?.[0]}
               </span>
             </div>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-gray-900 truncate">
-              {user.firstName} {user.lastName}
+              {user.prenom} {user.nom}
             </p>
             <p className="text-xs text-gray-500 truncate">
               {user.role === 'RH' ? 'Ressources Humaines' : 'Manager'}

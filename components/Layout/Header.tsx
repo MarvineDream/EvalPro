@@ -40,7 +40,7 @@ const Header = () => {
         <div className="flex items-center space-x-3">
           <div className="text-right">
             <p className="text-sm font-medium text-gray-900">
-              {user?.firstName} {user?.lastName}
+              {user?.prenom} {user?.nom}
             </p>
             <p className="text-xs text-gray-500">
               {user?.role === 'RH' ? 'Ressources Humaines' : 'RH'}
@@ -48,7 +48,7 @@ const Header = () => {
           </div>
           <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
             <span className="text-xs font-medium text-white">
-              {user?.firstName?.[0]}{user?.lastName?.[0]}
+              {user?.prenom?.[0]}{user?.nom?.[0]}
             </span>
           </div>
         </div>

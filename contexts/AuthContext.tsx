@@ -6,7 +6,7 @@ import {
   authenticateUser,
   getCurrentUser,
   saveAuthData,
-  clearAuthData,
+  clearAuthData
 } from '@/lib/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,31 +24,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem('authToken');
 
-    if (currentUser && token) {
-      // ✅ On attache le token à l'objet user
-      setUser({ ...currentUser, token });
-    }
-
+  if (!token) {
     setLoading(false);
-  }, []);
+    return;
+  }
 
-  const login = async (email: string, password: string): Promise<{ token: string; user: User } | null> => {
+  try {
+    const currentUser = getCurrentUser();
+    if (currentUser) {
+      setUser({ ...currentUser, token }); 
+    } else {
+      clearAuthData();
+      setUser(null);
+    }
+  } catch (error) {
+    console.error('Erreur lors du chargement de l’utilisateur :', error);
+    clearAuthData();
+    setUser(null);
+  } finally {
+    setLoading(false);
+  }
+}, []);
+
+
+  const login = async (
+    email: string,
+    password: string
+  ): Promise<{ token: string; user: User } | null> => {
     setLoading(true);
     try {
       const result = await authenticateUser(email, password);
-      if (result && result.user && result.token) {
-        // ✅ On attache le token à l'objet user
-        const userWithToken = { ...result.user, token: result.token };
+      if (result) {
         saveAuthData(result.user, result.token);
-        setUser(userWithToken);
-        return { token: result.token, user: userWithToken };
+        setUser(result.user);
+        return result;
       }
       return null;
     } catch (error) {
-      console.error('Erreur de login :', error);
+      console.error('Erreur lors de la connexion:', error);
       return null;
     } finally {
       setLoading(false);
