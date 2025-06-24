@@ -99,20 +99,7 @@ export default function NewPotentialEvaluationPage() {
 
   const isHR = user?.role === 'RH';
 
-  if (!isHR) {
-    return (
-      <div className="p-6 text-center">
-        <Star className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <h2 className="text-lg font-semibold text-gray-900">
-          Accès restreint
-        </h2>
-        <p className="text-gray-600">
-          Seuls les membres du service RH peuvent créer des évaluations de
-          potentiel.
-        </p>
-      </div>
-    );
-  }
+
 
   const [selectedEmployee, setSelectedEmployee] = useState<string>('');
   const [criteres, setCriteres] = useState(
@@ -190,7 +177,7 @@ export default function NewPotentialEvaluationPage() {
         </h1>
       </div>
 
-      <Grid container spacing={4}>
+      <Grid container direction="column" spacing={4}>
         <Grid item xs={12} md={6}>
           <Paper elevation={2} sx={{ p: 3 }}>
             <Typography variant="h6" color="error" gutterBottom>
