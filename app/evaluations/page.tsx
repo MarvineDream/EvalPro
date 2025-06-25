@@ -3,32 +3,37 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import {
-  ClipboardList,
-  Plus,
-  Search,
-  Filter,
-  Eye,
-  Edit,
-  CheckCircle,
-  Clock,
-  AlertTriangle,
-  Star,
-  FileText,
-  Calendar,
-  User,
-} from 'lucide-react';
+import {ClipboardList,Plus,Search,Filter,Eye,Edit,CheckCircle,Clock,AlertTriangle,Star,FileText,Calendar,User,} from 'lucide-react';
 import {
   getEvaluationsWithEmployee,
-  mockMidTermEvaluations,
-  mockPotentialEvaluations,
+  getPotentialEvaluationsWithEmployee
 } from '@/lib/mock-data';
-type Employee = {
+import { fetchArticles } from '@/lib/api';
+
+import { Employee } from '@/types/employee';
+import { MidTermEvaluation, PotentialEvaluation } from '@/types/evaluation';
+export interface EvaluationPotential {
   id: string;
-  firstName: string;
-  lastName: string;
-  // autres propriétés...
-};
+  employeeId: string;
+  evaluatorId: string;
+  criteria: {
+    leadership: number;
+    communication: number;
+    problemSolving: number;
+    adaptability: number;
+    innovation: number;
+    teamwork: number;
+  };
+  finalScore: number;
+  classification: string;
+  hrComment: string;
+  createdAt: Date;
+  updatedAt: Date;
+
+  // 🔥 ajoute ça :
+  employee: Employee;
+}
+
 
 
 export default function EvaluationsPage() {
@@ -45,19 +50,12 @@ export default function EvaluationsPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [open, setOpen] = useState(false);
 
-  /* ---------------------------------------------------------------------- */
-  /* Données                                                                */
-  /* ---------------------------------------------------------------------- */
-  const midTermEvaluations = getEvaluationsWithEmployee();
 
-  const potentialEvaluations = mockPotentialEvaluations.map((evaluation) => ({
-    ...evaluation,
-    employee:
-      evaluation.employee ??
-      mockMidTermEvaluations.find(
-        (me) => me.employeeId === evaluation.employeeId,
-      )?.employee,
-  }));
+ const midTermEvaluations: MidTermEvaluation[] = getEvaluationsWithEmployee();
+
+const potentialEvaluations: PotentialEvaluation[] = getPotentialEvaluationsWithEmployee();
+
+
 
   /* ---------------------------------------------------------------------- */
   /* Helpers d'affichage                                                    */
@@ -291,14 +289,9 @@ export default function EvaluationsPage() {
     </div>
   );
 
-  /* ---------------------------------------------------------------------- */
-  /* Rendu principal                                                        */
-  /* ---------------------------------------------------------------------- */
+ 
   return (
     <div className="p-6 space-y-6">
-      {/* ------------------------------------------------------------------ */}
-      {/* En-tête de page                                                    */}
-      {/* ------------------------------------------------------------------ */}
       <div className="border-b border-gray-200 pb-6">
         <div className="flex items-center justify-between">
           <div>
@@ -313,7 +306,6 @@ export default function EvaluationsPage() {
             </p>
           </div>
 
-          {/* Bouton "Nouvelle évaluation" -------------------------------- */}
           <button
             onClick={() => setOpen(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
@@ -323,7 +315,6 @@ export default function EvaluationsPage() {
           </button>
         </div>
 
-        {/* Popup choix Mi-parcours / Potentiel ---------------------------- */}
         {open && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white p-6 rounded-lg shadow-lg w-80">
@@ -355,11 +346,7 @@ export default function EvaluationsPage() {
         )}
       </div>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Carte avec onglets                                                 */}
-      {/* ------------------------------------------------------------------ */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        {/* Onglets --------------------------------------------------------- */}
         <div className="border-b border-gray-200">
           <nav className="flex space-x-8 px-6">
             <button
@@ -395,7 +382,6 @@ export default function EvaluationsPage() {
           </nav>
         </div>
 
-        {/* Filtres --------------------------------------------------------- */}
         <div className="p-6 border-b border-gray-200">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
@@ -431,7 +417,6 @@ export default function EvaluationsPage() {
           </div>
         </div>
 
-        {/* Contenu --------------------------------------------------------- */}
         <div className="p-6">
           {activeTab === 'midterm' && renderMidTermEvaluations()}
           {activeTab === 'potential' && renderPotentialEvaluations()}

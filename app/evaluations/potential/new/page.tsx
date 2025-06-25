@@ -85,6 +85,26 @@ const classificationCards = [
       'Fort potentiel pour réussir dans un large éventail d’environnements et de rôles différents.',
   },
 ];
+const fetchArticles = async (token: string) => {
+  try {
+    const res = await fetch('https://artiz-1ly2.onrender.com/api/admin/articles', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error('Erreur lors de la récupération des articles');
+    }
+
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error('Erreur fetchArticles:', error);
+    return null;
+  }
+};
+
 
 /* -------------------------------------------------------------------------- */
 /* Page                                                                       */
@@ -94,6 +114,20 @@ export default function NewPotentialEvaluationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
+  useEffect(() => {
+  const getArticles = async () => {
+    if (!user?.token) return;
+
+    const data = await fetchArticles(user.token);
+    if (data) {
+      console.log('Articles récupérés :', data);
+      // Tu peux aussi les stocker avec un setState ici si tu veux les utiliser dans le composant
+    }
+  };
+
+  getArticles();
+}, [user?.token]);
+
 
   const staffId = searchParams.get('staffId') ?? '';
 

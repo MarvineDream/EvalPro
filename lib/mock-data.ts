@@ -242,3 +242,18 @@ export const getContractsExpiringSoon = (days: number = 30) => {
     emp.contractEndDate && emp.contractEndDate <= cutoffDate
   );
 };
+
+export const getPotentialEvaluationsWithEmployee = (): EvaluationPotential[] => {
+  return mockPotentialEvaluations
+    .map((evaluation) => {
+      const employee = mockEmployees.find(
+        (emp) => emp.id === evaluation.employeeId
+      );
+      if (!employee) throw new Error(`Employee not found for ${evaluation.employeeId}`);
+      return {
+        ...evaluation,
+        employee,
+      };
+    });
+};
+
