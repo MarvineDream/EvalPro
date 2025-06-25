@@ -1,341 +1,283 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  Star, 
-  Save, 
+import {
+  ClipboardList,
+  Plus,
+  Search,
+  Filter,
+  Eye,
+  Edit,
+  CheckCircle,
+  Clock,
+  AlertTriangle,
+  Star,
+  FileText,
+  Calendar,
   User,
-  MessageSquare,
-  ArrowLeft,
-  Award,
-  TrendingUp,
-  Users,
-  Lightbulb,
-  Target,
-  Heart
 } from 'lucide-react';
-import { mockEmployees } from '@/lib/mock-data';
+import {
+  getEvaluationsWithEmployee,
+  mockMidTermEvaluations,
+  mockPotentialEvaluations,
+} from '@/lib/mock-data';
 
-const NewPotentialEvaluationPage = () => {
+const EvaluationsPage = () => {
   const { user } = useAuth();
-  const router = useRouter();
-  const [selectedEmployee, setSelectedEmployee] = useState('');
-  const [criteria, setCriteria] = useState({
-    leadership: 1,
-    communication: 1,
-    problemSolving: 1,
-    adaptability: 1,
-    innovation: 1,
-    teamwork: 1
-  });
-  const [hrComment, setHrComment] = useState('');
-
   const isHR = user?.role === 'RH';
 
-  if (!isHR) {
-    return (
-      <div className="p-6">
-        <div className="text-center py-12">
-          <Star className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Accès restreint</h3>
-          <p className="text-gray-600">
-            Seuls les RH peuvent créer des évaluations de potentiel.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const [activeTab, setActiveTab] = useState<'midterm' | 'potential' | 'final'>('midterm');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [midTermEvaluations, setMidTermEvaluations] = useState<any[]>([]);
+  const [potentialEvaluations, setPotentialEvaluations] = useState<any[]>([]);
 
-  const updateCriteria = (field: string, value: number) => {
-    setCriteria(prev => ({ ...prev, [field]: value }));
+  useEffect(() => {
+    const midterms = getEvaluationsWithEmployee();
+    setMidTermEvaluations(midterms);
+
+    const potentials = mockPotentialEvaluations.map((evaluation) => ({
+      ...evaluation,
+      employee: evaluation.employee || mockMidTermEvaluations.find((me) => me.employeeId === evaluation.employeeId)?.employee,
+    }));
+    setPotentialEvaluations(potentials);
+  }, []);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'TERMINEE':
+        return 'bg-green-100 text-green-800';
+      case 'EN_COURS':
+        return 'bg-amber-100 text-amber-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
-  const calculateFinalScore = () => {
-    const total = Object.values(criteria).reduce((sum, value) => sum + value, 0);
-    return (total / Object.keys(criteria).length).toFixed(1);
-  };
-
-  const getClassification = () => {
-    const score = parseFloat(calculateFinalScore());
-    if (score >= 4.5) return 'POTENTIAL';
-    if (score >= 3.5) return 'ACHIEVER';
-    return 'PROFESSIONAL';
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'TERMINEE':
+        return <CheckCircle className="h-4 w-4" aria-hidden="true" />;
+      case 'EN_COURS':
+        return <Clock className="h-4 w-4" aria-hidden="true" />;
+      default:
+        return <AlertTriangle className="h-4 w-4" aria-hidden="true" />;
+    }
   };
 
   const getClassificationColor = (classification: string) => {
     switch (classification) {
       case 'POTENTIAL':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
+        return 'bg-purple-100 text-purple-800';
       case 'ACHIEVER':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
+        return 'bg-blue-100 text-blue-800';
       case 'PROFESSIONAL':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return 'bg-green-100 text-green-800';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const handleSave = () => {
-    // Here you would save the evaluation
-    console.log('Saving potential evaluation');
-    router.push('/evaluations');
+  const formatDate = (date: Date | string) => {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    return d.toLocaleDateString('fr-FR');
   };
 
-  const renderStarRating = (value: number, onChange: (value: number) => void) => (
-    <div className="flex space-x-1">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <button
-          key={star}
-          type="button"
-          onClick={() => onChange(star)}
-          className={`p-1 rounded transition-colors duration-200 ${
-            star <= value 
-              ? 'text-yellow-400 hover:text-yellow-500' 
-              : 'text-gray-300 hover:text-gray-400'
-          }`}
-          aria-label={`Évaluer ${star} étoile${star > 1 ? 's' : ''}`}
-        >
-          <Star className="h-6 w-6 fill-current" />
-        </button>
-      ))}
-    </div>
-  );
+  const filterEvaluations = (evaluations: any[]) => {
+    return evaluations.filter((e) => {
+      const matchesSearch =
+        `${e.employee?.firstName ?? ''} ${e.employee?.lastName ?? ''}`
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
 
-  const criteriaConfig = [
-    {
-      key: 'leadership',
-      label: 'Leadership',
-      icon: Award,
-      description: 'Capacité à diriger et inspirer les autres',
-      color: 'text-purple-600'
-    },
-    {
-      key: 'communication',
-      label: 'Communication',
-      icon: MessageSquare,
-      description: 'Aptitude à communiquer efficacement',
-      color: 'text-blue-600'
-    },
-    {
-      key: 'problemSolving',
-      label: 'Résolution de problèmes',
-      icon: Target,
-      description: 'Capacité à analyser et résoudre les problèmes',
-      color: 'text-green-600'
-    },
-    {
-      key: 'adaptability',
-      label: 'Adaptabilité',
-      icon: TrendingUp,
-      description: 'Flexibilité face aux changements',
-      color: 'text-amber-600'
-    },
-    {
-      key: 'innovation',
-      label: 'Innovation',
-      icon: Lightbulb,
-      description: 'Créativité et esprit d\'innovation',
-      color: 'text-orange-600'
-    },
-    {
-      key: 'teamwork',
-      label: 'Travail d\'équipe',
-      icon: Users,
-      description: 'Collaboration et esprit d\'équipe',
-      color: 'text-indigo-600'
-    }
-  ];
+      const matchesStatus = !statusFilter || e.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  };
+
+  const renderMidTermEvaluations = () => {
+    const filtered = filterEvaluations(midTermEvaluations);
+    return (
+      <div className="space-y-4">
+        {filtered.map((evaluation) => (
+          <div key={evaluation.id} className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow">
+            <div className="p-6 flex items-start justify-between">
+              <div className="flex space-x-4">
+                <div className="p-3 bg-blue-50 rounded-lg">
+                  <ClipboardList className="h-6 w-6 text-blue-600" aria-hidden="true" />
+                </div>
+                <div>
+                  <div className="flex items-center space-x-3 mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Évaluation Mi-parcours - {evaluation.period}
+                    </h3>
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(evaluation.status)}`}>
+                      {getStatusIcon(evaluation.status)}
+                      <span>{evaluation.status === 'TERMINEE' ? 'Terminée' : 'En cours'}</span>
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                    <div className="flex items-center space-x-2"><User className="h-4 w-4" aria-hidden="true" /><span>{evaluation.employee?.firstName} {evaluation.employee?.lastName}</span></div>
+                    <div className="flex items-center space-x-2"><Calendar className="h-4 w-4" aria-hidden="true" /><span>Créée le {formatDate(evaluation.createdAt)}</span></div>
+                    <div className="flex items-center space-x-2"><Star className="h-4 w-4" aria-hidden="true" /><span>Note globale: {evaluation.globalAppreciation}/5</span></div>
+                  </div>
+                  <p className="text-sm text-gray-700 mt-3">{evaluation.objectives.length} objectif(s) • {evaluation.objectives.filter((obj: { completed: boolean }) => obj.completed).length
+} terminé(s)</p>
+                </div>
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                  aria-label="Voir l'évaluation"
+                >
+                  <Eye className="h-4 w-4" aria-hidden="true" />
+                </button>
+                {(isHR || evaluation.evaluatorId === user?.id) && (
+                  <button
+                    className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg"
+                    aria-label="Modifier l'évaluation"
+                  >
+                    <Edit className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const renderPotentialEvaluations = () => {
+    const filtered = filterEvaluations(potentialEvaluations);
+    return (
+      <div className="space-y-4">
+        {filtered.map((evaluation) => (
+          <div key={evaluation.id} className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow">
+            <div className="p-6 flex items-start justify-between">
+              <div className="flex space-x-4">
+                <div className="p-3 bg-purple-50 rounded-lg"><Star className="h-6 w-6 text-purple-600" aria-hidden="true" /></div>
+                <div>
+                  <div className="flex items-center space-x-3 mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">Évaluation de Potentiel</h3>
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getClassificationColor(evaluation.classification)}`}>
+                      {evaluation.classification}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                    <div className="flex items-center space-x-2"><User className="h-4 w-4" aria-hidden="true" /><span>{evaluation.employee?.firstName} {evaluation.employee?.lastName}</span></div>
+                    <div className="flex items-center space-x-2"><Calendar className="h-4 w-4" aria-hidden="true" /><span>Créée le {formatDate(evaluation.createdAt)}</span></div>
+                    <div className="flex items-center space-x-2"><Star className="h-4 w-4" aria-hidden="true" /><span>Score final: {evaluation.finalScore}/5</span></div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 mt-3 text-xs">
+                    <div className="text-center p-2 bg-blue-50 rounded"><div className="font-medium text-blue-700">{evaluation.criteria.leadership}</div><div className="text-blue-600">Leadership</div></div>
+                    <div className="text-center p-2 bg-green-50 rounded"><div className="font-medium text-green-700">{evaluation.criteria.communication}</div><div className="text-green-600">Communication</div></div>
+                    <div className="text-center p-2 bg-purple-50 rounded"><div className="font-medium text-purple-700">{evaluation.criteria.innovation}</div><div className="text-purple-600">Innovation</div></div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                  aria-label="Voir l'évaluation de potentiel"
+                >
+                  <Eye className="h-4 w-4" aria-hidden="true" />
+                </button>
+                {isHR && (
+                  <button
+                    className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg"
+                    aria-label="Modifier l'évaluation de potentiel"
+                  >
+                    <Edit className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Page Header */}
-      <div className="border-b border-gray-200 pb-6">
-        <div className="flex items-center space-x-4">
+    <main className="px-10 py-6 max-w-6xl mx-auto">
+      <h1 className="text-3xl font-bold mb-4">Mes évaluations</h1>
+
+      <div className="mb-6 flex justify-between items-center">
+        <div className="flex space-x-2">
           <button
-            onClick={() => router.back()}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200"
-            aria-label="Retour"
+            onClick={() => setActiveTab('midterm')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
+              activeTab === 'midterm' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'
+            }`}
+            aria-label="Onglet Évaluations Mi-parcours"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ClipboardList className="h-5 w-5" aria-hidden="true" />
+            <span>Mi-parcours</span>
           </button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center space-x-3">
-              <Star className="h-8 w-8 text-purple-600" />
-              <span>Nouvelle Évaluation de Potentiel</span>
-            </h1>
-            <p className="text-gray-600 mt-2">
-              Évaluez le potentiel d&apos;évolution d&apos;un employé
-            </p>
-          </div>
+          <button
+            onClick={() => setActiveTab('potential')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
+              activeTab === 'potential' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700'
+            }`}
+            aria-label="Onglet Évaluations de Potentiel"
+          >
+            <Star className="h-5 w-5" aria-hidden="true" />
+            <span>Potentiel</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('final')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
+              activeTab === 'final' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'
+            }`}
+            aria-label="Onglet Évaluations Finales"
+          >
+            <FileText className="h-5 w-5" aria-hidden="true" />
+            <span>Finales</span>
+          </button>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Form */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Employee Selection */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-              <User className="h-5 w-5 text-blue-600" />
-              <span>Employé à évaluer</span>
-            </h3>
-            
-            <select
-              value={selectedEmployee}
-              onChange={(e) => setSelectedEmployee(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              aria-label="Sélectionner un employé"
-              required
-            >
-              <option value="">Sélectionner un employé</option>
-              {mockEmployees.map(emp => (
-                <option key={emp._id} value={emp._id}>
-                  {emp.prenom} {emp.nom} - {emp.poste}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Criteria Evaluation */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center space-x-2">
-              <Star className="h-5 w-5 text-purple-600" />
-              <span>Critères d&apos;évaluation</span>
-            </h3>
-            
-            <div className="space-y-6">
-              {criteriaConfig.map((config) => {
-                const IconComponent = config.icon;
-                return (
-                  <div key={config.key} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <div className={`p-2 bg-gray-50 rounded-lg ${config.color}`}>
-                          <IconComponent className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-gray-900">{config.label}</h4>
-                          <p className="text-sm text-gray-600">{config.description}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="flex items-center space-x-2 mb-1">
-                          {renderStarRating(criteria[config.key as keyof typeof criteria], (value) => updateCriteria(config.key, value))}
-                        </div>
-                        <span className="text-sm text-gray-600">
-                          ({criteria[config.key as keyof typeof criteria]}/5)
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* RH Comment */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-              <MessageSquare className="h-5 w-5 text-amber-600" />
-              <span>Commentaire RH</span>
-            </h3>
-            
-            <textarea
-              value={hrComment}
-              onChange={(e) => setHrComment(e.target.value)}
-              rows={6}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Commentaire général sur le potentiel de l'employé, recommandations d'évolution, points d'amélioration..."
+        <div className="flex space-x-2">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Rechercher un collaborateur..."
+              className="pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="Recherche collaborateur"
             />
-          </div>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Score Summary */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Résumé</h3>
-            
-            <div className="space-y-4">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-gray-900 mb-1">
-                  {calculateFinalScore()}/5
-                </div>
-                <div className="text-sm text-gray-600">Score final</div>
-              </div>
-              
-              <div className="text-center">
-                <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium border ${getClassificationColor(getClassification())}`}>
-                  {getClassification()}
-                </span>
-              </div>
-              
-              <div className="border-t border-gray-200 pt-4">
-                <div className="space-y-2 text-sm">
-                  {criteriaConfig.map((config) => (
-                    <div key={config.key} className="flex justify-between">
-                      <span className="text-gray-600">{config.label}</span>
-                      <span className="font-medium">
-                        {criteria[config.key as keyof typeof criteria]}/5
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" aria-hidden="true" />
           </div>
 
-          {/* Actions */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Actions</h3>
-            <div className="space-y-3">
-              <button
-                onClick={handleSave}
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200"
-              >
-                <Save className="h-4 w-4" />
-                <span>Sauvegarder l&apos;évaluation</span>
-              </button>
-              
-              <button
-                onClick={() => router.back()}
-                className="w-full border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg transition-colors duration-200"
-              >
-                Annuler
-              </button>
-            </div>
-          </div>
+          <button
+            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+            aria-label="Filtrer par statut"
+          >
+            <Filter className="h-5 w-5" aria-hidden="true" />
+          </button>
 
-          {/* Classification Guide */}
-          <div className="bg-purple-50 rounded-xl border border-purple-200 p-6">
-            <h3 className="text-lg font-semibold text-purple-900 mb-3">Guide de classification</h3>
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                <span className="text-purple-800">
-                  <strong>POTENTIAL</strong> (4.5-5): Fort potentiel d&apos;évolution
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                <span className="text-purple-800">
-                  <strong>ACHIEVER</strong> (3.5-4.4): Bon performer avec potentiel
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span className="text-purple-800">
-                  <strong>PROFESSIONAL</strong> (1-3.4): Professionnel solide
-                </span>
-              </div>
-            </div>
-          </div>
+          {isHR && (
+            <button
+              className="p-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center space-x-1"
+              aria-label="Créer une nouvelle évaluation"
+            >
+              <Plus className="h-5 w-5" aria-hidden="true" />
+              <span>Ajouter</span>
+            </button>
+          )}
         </div>
       </div>
-    </div>
+
+      {activeTab === 'midterm' && renderMidTermEvaluations()}
+      {activeTab === 'potential' && renderPotentialEvaluations()}
+      {activeTab === 'final' && (
+        <div className="text-center text-gray-500">Pas d’évaluations finales disponibles.</div>
+      )}
+    </main>
   );
 };
 
-export default NewPotentialEvaluationPage;
+export default EvaluationsPage;
