@@ -14,6 +14,7 @@ export interface Department {
   id: string;
   name: string;
   managerId?: string;
+  description: string;
   createdAt: Date;
 }
 
@@ -26,7 +27,7 @@ export interface Employee {
   poste: string;
   departmentId: string;
   department?: Department;
-  contractType: 'CDI' | 'CDD' | 'stagiaire' | 'consultant';
+  contractType: 'CDI' | 'CDD' | 'stagiaire';
   contractStartDate: Date;
   contractEndDate?: Date;
   salary?: number;

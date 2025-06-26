@@ -5,29 +5,33 @@ export const mockDepartments: Department[] = [
     id: 'dept-1',
     name: 'Informatique',
     managerId: '2',
+    description: 'Département en charge des systèmes informatiques et du développement logiciel.',
     createdAt: new Date('2024-01-01')
   },
   {
     id: 'dept-2',
     name: 'Ressources Humaines',
     managerId: '1',
+    description: 'Département responsable de la gestion du personnel et des ressources humaines.',
     createdAt: new Date('2024-01-01')
   },
   {
     id: 'dept-3',
     name: 'Marketing',
+    description: 'Département chargé de la promotion et de la communication de l\'entreprise.',
     createdAt: new Date('2024-01-01')
   },
   {
     id: 'dept-4',
     name: 'Finance',
+    description: 'Département en charge de la gestion financière et comptable.',
     createdAt: new Date('2024-01-01')
   }
 ];
 
 export const mockEmployees: Employee[] = [
   {
-    id: 'emp-1',
+    _id: 'emp-1',
     employeeId: 'EMP001',
     prenom: 'Sophie',
     nom: 'Leroy',
@@ -42,7 +46,7 @@ export const mockEmployees: Employee[] = [
     updatedAt: new Date('2024-01-15')
   },
   {
-    id: 'emp-2',
+    _id: 'emp-2',
     employeeId: 'EMP002',
     prenom: 'Thomas',
     nom: 'Bernard',
@@ -57,7 +61,7 @@ export const mockEmployees: Employee[] = [
     updatedAt: new Date('2024-01-10')
   },
   {
-    id: 'emp-3',
+    _id: 'emp-3',
     employeeId: 'EMP003',
     prenom: 'Emma',
     nom: 'Rousseau',
@@ -72,7 +76,7 @@ export const mockEmployees: Employee[] = [
     updatedAt: new Date('2024-01-15')
   },
   {
-    id: 'emp-4',
+    _id: 'emp-4',
     employeeId: 'EMP004',
     prenom: 'Lucas',
     nom: 'Moreau',
@@ -86,7 +90,7 @@ export const mockEmployees: Employee[] = [
     updatedAt: new Date('2024-01-05')
   },
   {
-    id: 'emp-5',
+    _id: 'emp-5',
     employeeId: 'EMP005',
     prenom: 'Camille',
     nom: 'Petit',
@@ -226,7 +230,7 @@ export const getEmployeesWithDepartments = () => {
 export const getEvaluationsWithEmployee = () => {
   return mockMidTermEvaluations.map(evaluation => ({
     ...evaluation,
-    employee: mockEmployees.find(emp => emp.id === evaluation.employeeId)
+    employee: mockEmployees.find(emp => emp._id === evaluation.employeeId)
   }));
 };
 
@@ -241,4 +245,4 @@ export const getContractsExpiringSoon = (days: number = 30) => {
   return mockEmployees.filter(emp => 
     emp.contractEndDate && emp.contractEndDate <= cutoffDate
   );
-};
+};   
