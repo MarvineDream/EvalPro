@@ -43,7 +43,7 @@ const TeamPage: React.FC = () => {
     if (isManager && user?.departmentId) {
       const fetchEmployees = async () => {
         try {
-          const res = await fetch(`https://backendeva.onrender.com/staff/by-department/${user.departmentId}`, {
+          const res = await fetch(`http://localhost:7000/staff/by-departement/${user.departmentId}`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           const data: User[] = await res.json();
@@ -61,7 +61,7 @@ const TeamPage: React.FC = () => {
     if (isManager && user?.departmentId) {
       const fetchEvaluations = async () => {
         try {
-          const res = await fetch(`https://backendeva.onrender.com/evaluation/department/${user.departmentId}`, {
+          const res = await fetch(`http://localhost:7000/evaluation/manager/mine`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           const data: Evaluation[] = await res.json();
